@@ -11,43 +11,44 @@ import matplotlib.pyplot as plt
 plt.axis('off')
 
 # Load data
-data = pd.read_csv('../Result/data_clear.csv')
 
 
+data = pd.read_csv("exp_merge_mix.csv")
+top_feature_list = ['Readable', 'BW-Avg-number-of-identifiers', 'BW-Avg-comments', 'BW-Max-indentation',
+        'BW-Max-char', 'BW-Avg-periods', 'BW-Avg-Assignment', 'BW-Max-line-length',
+        'New-Semantic-Text-Coherence-Standard-@-0.1', 'BW-Avg-Identifiers-Length', "New-Number-of-senses-AVG",
+                    'BW-Max-Single-identifiers', 'BW-Max-number-of-identifiers']
 
-list = ['score', 'avg_comment', 'avg_identifier', 'max_indentation',
-        'max_single_char', 'avg_dot', 'avg_keyword', 'avg_bracket',
-        'avg_if', 'avg_assignment', 'avg_comparison']
+
+# 得到所有的feature name
+feature_list = []
+for row in data:
+    feature_list.append(row)
 
 
-data.drop(['id'],axis = 1, inplace = True)
-index = data[data['score'] == 0].index
-data.drop(index, axis = 0, inplace= True)
-
-name_list = ['avg_identifier_length','max_identifier_length','avg_identifier','max_identifier','max_single_identifier'
-        ,'avg_arithmetic','avg_comparison','avg_assignment','avg_comma','avg_dot','avg_bracket','max_keyword'
-        ,'avg_keyword','max_number','avg_number','avg_loop','avg_if','avg_space','max_indentation'
-        ,'avg_indentation','avg_comment','max_single_char','avg_blank','max_line_length','avg_line_length'
-        ,'score'
-       ]
-
-for element in name_list:
-    if element not in list:
+#
+for element in feature_list:
+    if element not in top_feature_list:
         data.drop([element], axis=1, inplace=True)
 
 
 print(data.head())
 
 # Finding the structure of the graph
+# 确认骨架
 # glasso = cdt.independence.graph.Glasso()
 # skeleton = glasso.predict(data)
 
 
-# PC Algorithm
+# 用PC算法确认骨架
 model = cdt.causality.graph.PC()
 skeleton = model.predict(data)
 
-# Additive Noise Models
+# output_graph = skeleton
+
+# Pairwise setting
+# 确认方向
+# ANM方法是添加单向噪音来区别因和果
 model = cdt.causality.pairwise.ANM()
 output_graph = model.predict(data, skeleton)
 
